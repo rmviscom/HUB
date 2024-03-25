@@ -39,7 +39,7 @@ body {
   height: 60px;
   border-radius: 100%;
   display: block;
-  background: linear-gradient(45deg, #00B5F5, #002A8F);
+  background: linear-gradient(45deg, #e00700, #7d0400);
   transition: all 265ms ease-out;
 }
 .social-icons a:hover:before {
@@ -51,7 +51,7 @@ body {
   -ms-transform: scale(2.2);
   -webkit-transform: scale(2.2);
   color: #00B5F5;
-  background: -webkit-linear-gradient(45deg, #00B5F5, #002A8F);
+  background: -webkit-linear-gradient(45deg, #e00700, #7d0400);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   transition: all 265ms ease-in;
