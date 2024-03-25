@@ -1,4 +1,4 @@
-@import url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.css);
+00700@import url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.css);
 
 .social-container {
   width: 400px;
@@ -47,7 +47,7 @@
   transform: scale(2.2);
   -ms-transform: scale(2.2);
   -webkit-transform: scale(2.2);
-  color: #00B5F5;
+  color: #e00700;
   background: -webkit-linear-gradient(45deg, #e00700, #7d0400);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
