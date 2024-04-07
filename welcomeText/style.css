@@ -110,7 +110,7 @@
 	        animation-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1);
 }
 
-.reveal-text {
+.dark .reveal-text  {
 	--animation-delay: var(--delay, 0);
 	--animation-duration: var(--duration, 800ms);
 	--animation-iterations: var(--iterations, 1);
@@ -120,6 +120,20 @@
 	-webkit-animation-name: clip-text;
 	        animation-name: clip-text;
 	color: #212427;
+	white-space: nowrap;
+	cursor: default
+	
+}
+.light .reveal-text  {
+	--animation-delay: var(--delay, 0);
+	--animation-duration: var(--duration, 800ms);
+	--animation-iterations: var(--iterations, 1);
+	position: relative;
+	font-size: 11vw;
+	font-family:"NB International Pro", sans-serif;
+	-webkit-animation-name: clip-text;
+	        animation-name: clip-text;
+	color: #fff;
 	white-space: nowrap;
 	cursor: default
 	
