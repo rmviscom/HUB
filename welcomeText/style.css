@@ -115,8 +115,8 @@
 	--animation-duration: var(--duration, 800ms);
 	--animation-iterations: var(--iterations, 1);
 	position: relative;
-	font-size: 10vw;
-	font-family:nbinternationalproreg, sans-serif;
+	font-size: 4vw;
+	font-family:"NB International Pro", sans-serif;
 	-webkit-animation-name: clip-text;
 	        animation-name: clip-text;
 	color: #FFF;
