@@ -8,7 +8,7 @@
     grid-auto-columns: 1fr;
     gap: 1rem;
   }
-  .countdown > .part {
+  .countdown > .part { 
     display: grid;
     gap: 0.5rem;
   }
