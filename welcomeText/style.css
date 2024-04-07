@@ -116,6 +116,7 @@
 	--animation-iterations: var(--iterations, 1);
 	position: relative;
 	font-size: 10vw;
+	font-family:nbinternationalproreg, sans-serif;
 	-webkit-animation-name: clip-text;
 	        animation-name: clip-text;
 	color: #FFF;
