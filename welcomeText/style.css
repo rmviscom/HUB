@@ -110,7 +110,7 @@
 	        animation-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1);
 }
 
-.dark .reveal-text  {
+.dark.reveal-text  {
 	--animation-delay: var(--delay, 0);
 	--animation-duration: var(--duration, 800ms);
 	--animation-iterations: var(--iterations, 1);
@@ -124,7 +124,7 @@
 	cursor: default
 	
 }
-.light .reveal-text  {
+.light.reveal-text  {
 	--animation-delay: var(--delay, 0);
 	--animation-duration: var(--duration, 800ms);
 	--animation-iterations: var(--iterations, 1);
