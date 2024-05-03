@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharePoint List Cards</title>
+</head>
+<body>
+    <div id="cardContainer" style="background-color:white; border:1px solid #eeeeee; border-radius:5px;"></div>
+
+    <script>
+        // Function to fetch data from SharePoint list using REST API
+        function fetchData() {
+            // Make a GET request to SharePoint REST API endpoint for your list
+            fetch("https://robinsmorton.sharepoint.com/_api/web/lists/getbytitle('BFPtest23')/items", {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json;odata=verbose",
+                    "Content-Type": "application/json;odata=verbose",
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Call function to generate HTML cards
+                generateCards(data.d.results);
+            })
+            .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // Function to generate HTML cards
+        function generateCards(data) {
+            const cardContainer = document.getElementById('cardContainer');
+            // Clear existing content
+            cardContainer.innerHTML = '';
+
+            // Iterate through the data and create HTML cards
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+
+                const title = document.createElement('h2');
+                title.textContent = item.BestPractice; // Assuming 'Title' is a field in your SharePoint list
+
+                const description = document.createElement('p');
+                description.textContent = item.Tool; // Assuming 'Description' is another field
+
+                card.appendChild(title);
+                card.appendChild(description);
+
+                cardContainer.appendChild(card);
+            });
+        }
+
+        // Call fetchData function when the page loads
+        fetchData();
+    </script>
+</body>
+</html>
