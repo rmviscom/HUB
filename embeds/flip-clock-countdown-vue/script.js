@@ -95,7 +95,7 @@ var Countdown = new Vue({
 
   ready() {
     if (window['requestAnimationFrame']) {
-      this.setCountdown('2026-04-23 08:00:00');;
+      this.setCountdown('2026-04-23 08:00:00');
       this.callback = this.callback || function () {};
       this.update();
     }
