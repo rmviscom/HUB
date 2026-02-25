@@ -6,7 +6,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background:url("https://rmviscom.github.io/HUB/embeds/flip-clock-countdown-vue/gradbg.png") bottom right cover;
+  background:url("https://rmviscom.github.io/HUB/embeds/flip-clock-countdown-vue/gradbg.png") cover;
 }
 .flip-clock {
   text-align: center;
