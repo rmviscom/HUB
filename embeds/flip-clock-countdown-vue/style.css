@@ -6,7 +6,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #EEE;
+  background: url(https://rmviscom.github.io/HUB/embeds/flip-clock-countdown-vue/My%20Movie2.mp4);
 }
 .flip-clock {
   text-align: center;
