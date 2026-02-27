@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robins & Morton — Out-of-Town Compensation Matrix</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #fff; color: #222; padding: 20px; }
+  
+  .header { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; flex-wrap: wrap; }
+  .logo { background: #E10600; color: #fff; font-weight: bold; font-size: 13px; padding: 5px 13px; letter-spacing: 1px; }
+  h1 { font-size: 22px; color: #003057; }
+  .subtitle { font-size: 12px; color: #666; margin-bottom: 14px; line-height: 1.5; }
+  
+  .controls { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .search-wrap { position: relative; flex: 1 1 200px; }
+  .search-wrap input { width: 100%; padding: 7px 10px 7px 30px; border: 1px solid #D0D0CE; border-radius: 4px; font-size: 13px; font-family: Arial; }
+  .search-wrap svg { position: absolute; left: 8px; top: 9px; }
+  .filters { display: flex; gap: 4px; flex-wrap: wrap; }
+  .filters button { padding: 5px 11px; font-size: 11px; font-family: Arial; border: 1px solid #D0D0CE; border-radius: 4px; cursor: pointer; background: #fff; color: #222; transition: all 0.15s; }
+  .filters button.active { background: #003057; color: #fff; border-color: #003057; font-weight: bold; }
+  .filters button:hover:not(.active) { background: #f5f5f5; }
+  .count { font-size: 11px; color: #999; margin-bottom: 6px; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid #D0D0CE; border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; min-width: 1300px; }
+  thead th { background: #003057; color: #fff; font-size: 10px; font-weight: bold; padding: 10px 8px; text-align: left; white-space: pre-line; line-height: 1.3; border-right: 1px solid rgba(255,255,255,0.15); cursor: pointer; user-select: none; position: relative; }
+  thead th:hover { background: #004070; }
+  thead th .sort-icon { font-size: 9px; margin-left: 2px; }
+  
+  tbody tr { border-bottom: 1px solid #eee; transition: background 0.1s; }
+  tbody tr:nth-child(even) { background: #FAFAFA; }
+  tbody tr:hover { background: #E8EFF7; }
+  
+  td { padding: 7px 8px; font-size: 12px; white-space: nowrap; border-right: 1px solid #f0f0f0; }
+  td.title-cell { font-weight: 600; color: #003057; position: sticky; left: 0; z-index: 1; border-right: 1px solid #D0D0CE; min-width: 210px; }
+  tbody tr:nth-child(even) td.title-cell { background: #FAFAFA; }
+  tbody tr:nth-child(odd) td.title-cell { background: #fff; }
+  tbody tr:hover td.title-cell { background: #E8EFF7; }
+
+  .cat-badge { font-size: 8px; padding: 2px 5px; border-radius: 2px; font-weight: bold; margin-right: 6px; display: inline-block; vertical-align: middle; }
+  .cat-MGMT { background: #EBF0F7; color: #003057; border: 1px solid #003057; }
+  .cat-SUPT { background: #FFF5F5; color: #E10600; border: 1px solid #E10600; }
+  .cat-FLDS { background: #F0F7F0; color: #2E7D32; border: 1px solid #2E7D32; }
+  .cat-CRFT { background: #FFF8E1; color: #F57F17; border: 1px solid #F57F17; }
+  .cat-CRFH { background: #FFF3E0; color: #E65100; border: 1px solid #E65100; }
+  .cat-COOP { background: #F3E5F5; color: #7B1FA2; border: 1px solid #7B1FA2; }
+
+  .val-dash { color: #ccc; }
+  .val-money { font-weight: 600; background: #FFF8E1; border-radius: 2px; padding: 1px 4px; }
+  .val-cost { font-weight: 600; background: #E8F5E9; border-radius: 2px; padding: 1px 4px; }
+  .val-pct { font-weight: 600; background: #E3F2FD; border-radius: 2px; padding: 1px 4px; }
+  .val-rate { font-weight: 600; }
+  
+  .no-results { text-align: center; padding: 30px; color: #999; font-size: 14px; }
+
+  .legend { margin-top: 14px; padding: 14px 18px; background: #F8F9FA; border-radius: 6px; border: 1px solid #D0D0CE; }
+  .legend h3 { font-size: 12px; color: #003057; margin-bottom: 8px; }
+  .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; font-size: 11px; color: #555; line-height: 1.55; }
+  .legend-footer { margin-top: 8px; font-size: 10px; color: #999; border-top: 1px solid #ddd; padding-top: 6px; }
+
+  @media (max-width: 768px) {
+    .legend-grid { grid-template-columns: 1fr; }
+    .controls { flex-direction: column; }
+  }
+  @media print {
+    .controls, .search-wrap { display: none; }
+    .table-wrap { overflow: visible; border: none; }
+    table { min-width: unset; font-size: 9px; }
+    td, th { padding: 4px 5px; }
+    td.title-cell { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">ROBINS &amp; MORTON</div>
+  <h1>Out-of-Town Compensation Matrix</h1>
+</div>
+<div class="subtitle">
+  For employees assigned to projects &gt;50 miles from declared permanent residence. All allowances are taxable unless noted.<br>
+  Temporary assignments &lt;2 months default to AA-084 lodging reimbursement. Form AA-084.1 required before any assignment.
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Search by title..." oninput="filterTable()">
+  </div>
+  <div class="filters" id="filterBtns"></div>
+</div>
+<div class="count" id="countLabel"></div>
+
+<div class="table-wrap">
+  <table>
+    <thead><tr id="headerRow"></tr></thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<div class="legend">
+  <h3>Legend &amp; Notes</h3>
+  <div class="legend-grid">
+    <div><strong>At Cost</strong> = Reasonable furnished housing + utilities + internet + phone + basic TV (≤$100). Meals excluded.</div>
+    <div><strong>20% Base</strong> = Weekly travel compensation equal to 20% of base salary. Taxable.</div>
+    <div><strong>½ IRS</strong> = Mileage at half the IRS published rate (vehicle/truck allowance recipients).</div>
+    <div><strong>Full IRS</strong> = Mileage at the full IRS published rate.</div>
+    <div><strong>Per OM Schedule</strong> = Per diem rate set by OM based on location, title, cost of living. Avg ~$60/day.</div>
+    <div><strong>2/mo</strong> = Two reimbursed trips to permanent residence per month.</div>
+    <div><strong>$2,000/yr</strong> = Annual travel allowance for trips to destination of choice (OM/PD approval required).</div>
+    <div><strong>OM/PD Determines</strong> = For assignments &lt;6 months, OM/PD selects method per AA-084.</div>
+    <div><strong>— (dash)</strong> = Not eligible per current policy. May be eligible with OM/PD + VP P&amp;D approval.</div>
+    <div><strong>Assignments &gt;1 year</strong> = All reimbursements taxable from day one per IRS. R&amp;M grosses up at-cost titles.</div>
+  </div>
+  <div class="legend-footer">
+    Fuel card and mileage reimbursement should not cover the same trip. Policies: AA-070, 071, 072, 080, 081, 082, 083, 084, 090, 091, 101. Rev. 02/2026.
+  </div>
+</div>
+
+<script>
+var cols = [
+  {key:"title",label:"Title",w:"210px"},
+  {key:"autoAllow",label:"Auto Allowance\n(AA-070)"},
+  {key:"truckAllow",label:"Truck Allowance\n(AA-071)"},
+  {key:"fuelCard",label:"Fuel Card\n(AA-072)"},
+  {key:"mileageRate",label:"Mileage Rate\n(AA-090)"},
+  {key:"livingAllow",label:"Living Allowance\n(AA-080)"},
+  {key:"travelComp",label:"Travel Comp\n(AA-081)"},
+  {key:"perDiem",label:"Per Diem\n(AA-082)"},
+  {key:"tripsHome",label:"Trips Home\n(AA-091)"},
+  {key:"miscReloc",label:"Misc. Reloc.\n(AA-101)"},
+  {key:"tempAssign",label:"Temp Assign\n(AA-084)"},
+  {key:"policies",label:"Policy Refs"}
+];
+
+var catMap = {Management:{badge:"MGMT",cls:"cat-MGMT"},Superintendent:{badge:"SUPT",cls:"cat-SUPT"},"Field Salaried":{badge:"FLDS",cls:"cat-FLDS"},"Craft Salaried":{badge:"SALCRFT",cls:"cat-CRFT"},"Craft Hourly":{badge:"HRLCRFT",cls:"cat-CRFH"},"Co-op/Intern":{badge:"COOP",cls:"cat-COOP"}};
+var categories = ["All","Management","Superintendent","Field Salaried","Craft Salaried","Craft Hourly","Co-op/Intern"];
+
+var data = [
+  {title:"Project Director",cat:"Management",autoAllow:"$1,000",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"070, 080, 091, 101"},
+  {title:"Senior Project Manager",cat:"Management",autoAllow:"$1,000",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"070, 080, 091, 101"},
+  {title:"Senior Preconstruction Manager",cat:"Management",autoAllow:"$1,000",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"—",travelComp:"—",perDiem:"—",tripsHome:"—",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"070"},
+  {title:"Craft Senior Project Manager",cat:"Management",autoAllow:"$1,000",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"070, 080, 091, 101"},
+  {title:"Project Manager",cat:"Management",autoAllow:"$600",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"070, 080, 091, 101"},
+  {title:"Preconstruction Manager",cat:"Management",autoAllow:"$600",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"—",travelComp:"—",perDiem:"—",tripsHome:"—",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"070"},
+  {title:"Senior Preconstruction Estimator",cat:"Management",autoAllow:"$600",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"—",travelComp:"—",perDiem:"—",tripsHome:"—",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"070"},
+  {title:"Craft Project Manager",cat:"Management",autoAllow:"$600",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"070, 081, 091, 101"},
+  {title:"Senior MEP Manager",cat:"Management",autoAllow:"$600",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"—",travelComp:"—",perDiem:"—",tripsHome:"—",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"070"},
+  {title:"Layout Manager",cat:"Management",autoAllow:"$600",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"—",travelComp:"—",perDiem:"—",tripsHome:"—",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"070"},
+  {title:"Building Envelope Risk Manager",cat:"Management",autoAllow:"$600",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"—",travelComp:"—",perDiem:"—",tripsHome:"—",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"070"},
+  {title:"Business Development Manager",cat:"Management",autoAllow:"$600",truckAllow:"—",fuelCard:"—",mileageRate:"½ IRS",livingAllow:"—",travelComp:"—",perDiem:"—",tripsHome:"—",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"070"},
+  {title:"Senior Division Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$1,000",fuelCard:"$350",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 080, 091, 101"},
+  {title:"Division Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$1,000",fuelCard:"$350",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 080, 091, 101"},
+  {title:"General Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$1,000",fuelCard:"$350",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 080, 091, 101"},
+  {title:"Senior Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$1,000",fuelCard:"$350",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 080, 091, 101"},
+  {title:"Senior MEP Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$1,000",fuelCard:"$350",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 080, 091, 101"},
+  {title:"Craft Senior Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$1,000",fuelCard:"$350",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 080, 091, 101"},
+  {title:"Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$1,000",fuelCard:"$350",mileageRate:"½ IRS",livingAllow:"At Cost",travelComp:"—",perDiem:"—",tripsHome:"2/mo",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 080, 091, 101"},
+  {title:"Craft Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$1,000",fuelCard:"$350",mileageRate:"½ IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 081, 091, 101"},
+  {title:"MEP Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$600",fuelCard:"$350",mileageRate:"½ IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 081, 091, 101"},
+  {title:"Field Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$500",fuelCard:"$200",mileageRate:"½ IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 081, 091, 101"},
+  {title:"Craft Field Superintendent",cat:"Superintendent",autoAllow:"—",truckAllow:"$500",fuelCard:"$200",mileageRate:"½ IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"071, 072, 081, 091, 101"},
+  {title:"Asst. Superintendent",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Asst. Craft Superintendent",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Asst. Project Manager",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Asst. Craft Project Manager",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"MEP Manager",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"MEP Coordinator",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Senior VDC Coordinator",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"VDC Coordinator",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"VDC Assistant Coordinator",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Sr. Project Safety Manager",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Project Safety Manager",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Field Safety Engineer",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Project Scheduler",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Project Engineer",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Field Engineer",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Quality Control Manager",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Sr. Field Office Assistant",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Field Office Assistant",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"Construction Coordinator",cat:"Field Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"$1,100",tempAssign:"OM/PD Determines",policies:"081, 091, 101"},
+  {title:"General Foreman",cat:"Craft Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"081, 091"},
+  {title:"Senior Craft Specialist",cat:"Craft Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"081, 091"},
+  {title:"Craft Specialist",cat:"Craft Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"081, 091"},
+  {title:"Craft Foreman",cat:"Craft Salaried",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"20% Base",perDiem:"—",tripsHome:"$2,000/yr",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"081, 091"},
+  {title:"Hourly Craft Workers (Other)",cat:"Craft Hourly",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"—",travelComp:"—",perDiem:"Per OM Schedule",tripsHome:"—",miscReloc:"—",tempAssign:"OM/PD Determines",policies:"082"},
+  {title:"Co-op / Intern (Full-Time)",cat:"Co-op/Intern",autoAllow:"—",truckAllow:"—",fuelCard:"—",mileageRate:"Full IRS",livingAllow:"$1,000/mo",travelComp:"—",perDiem:"—",tripsHome:"1 RT/semester",miscReloc:"—",tempAssign:"—",policies:"083"}
+];
+
+var activeCat = "All";
+var sortKey = null;
+var sortDir = "asc";
+
+function init() {
+  var fb = document.getElementById("filterBtns");
+  categories.forEach(function(c) {
+    var b = document.createElement("button");
+    b.textContent = c;
+    b.className = c === "All" ? "active" : "";
+    b.onclick = function() {
+      activeCat = c;
+      document.querySelectorAll(".filters button").forEach(function(x){x.className=""});
+      b.className = "active";
+      filterTable();
+    };
+    fb.appendChild(b);
+  });
+  buildHeader();
+  filterTable();
+}
+
+function buildHeader() {
+  var hr = document.getElementById("headerRow");
+  hr.innerHTML = "";
+  cols.forEach(function(col) {
+    var th = document.createElement("th");
+    th.innerHTML = col.label.replace(/\n/g,"<br>") + ' <span class="sort-icon"></span>';
+    th.style.minWidth = col.w || "90px";
+    if (col.key === "title") { th.style.position = "sticky"; th.style.left = "0"; th.style.zIndex = "3"; }
+    th.onclick = function() { toggleSort(col.key); };
+    hr.appendChild(th);
+  });
+}
+
+function toggleSort(key) {
+  if (sortKey === key) { sortDir = sortDir === "asc" ? "desc" : "asc"; }
+  else { sortKey = key; sortDir = "asc"; }
+  filterTable();
+}
+
+function fmtCell(val) {
+  if (val === "—") return '<span class="val-dash">—</span>';
+  if (val === "At Cost") return '<span class="val-cost">At Cost</span>';
+  if (val === "20% Base") return '<span class="val-pct">20% Base</span>';
+  if (val === "½ IRS" || val === "Full IRS") return '<span class="val-rate">' + val + '</span>';
+  if (val.charAt(0) === "$") return '<span class="val-money">' + val + '</span>';
+  return val;
+}
+
+function filterTable() {
+  var q = document.getElementById("searchInput").value.toLowerCase();
+  var filtered = data.filter(function(r) {
+    var mc = activeCat === "All" || r.cat === activeCat;
+    var ms = !q || r.title.toLowerCase().indexOf(q) >= 0;
+    return mc && ms;
+  });
+
+  if (sortKey) {
+    filtered.sort(function(a, b) {
+      var av = a[sortKey], bv = b[sortKey];
+      if (av === "—" && bv !== "—") return 1;
+      if (bv === "—" && av !== "—") return -1;
+      var c = av.localeCompare(bv);
+      return sortDir === "asc" ? c : -c;
+    });
+  }
+
+  document.getElementById("countLabel").textContent = "Showing " + filtered.length + " of " + data.length + " titles";
+
+  var tb = document.getElementById("tableBody");
+  tb.innerHTML = "";
+
+  if (filtered.length === 0) {
+    tb.innerHTML = '<tr><td colspan="' + cols.length + '" class="no-results">No titles match your search.</td></tr>';
+    return;
+  }
+
+  filtered.forEach(function(row) {
+    var tr = document.createElement("tr");
+    var cm = catMap[row.cat] || {badge:"?",cls:""};
+    
+    var tdTitle = document.createElement("td");
+    tdTitle.className = "title-cell";
+    tdTitle.innerHTML = '<span class="cat-badge ' + cm.cls + '">' + cm.badge + '</span>' + row.title;
+    tr.appendChild(tdTitle);
+
+    cols.slice(1).forEach(function(col) {
+      var td = document.createElement("td");
+      td.innerHTML = fmtCell(row[col.key]);
+      tr.appendChild(td);
+    });
+
+    tb.appendChild(tr);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
