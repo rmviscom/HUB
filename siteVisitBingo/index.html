@@ -45,6 +45,9 @@
 </style>
 
 <div class="setup no-print">
+  <h2 style="color:#101820;">Site Visit Bingo Card Generator</h2>
+  <p class="sub">Create bingo cards with common project sights and let your visitors play to win! Customize your cards with things they may see or do on your jobsite. Enter the number of cards you need, and they'll be randomized. The generator creates two cards per 8.5"x11" page that you can print and cut on demand.</p>
+
   <div class="row">
     <div class="field">
       <label>Number of cards to print</label>
@@ -56,19 +59,17 @@
       <span id="status"></span>
     </div>
   </div>
-  <div class="row">
-  <div class="field" style="margin-bottom:8px;">
-    <label>Custom bingo items (optional)</label>
-      <p class="items-note">Add as many site-specific items as you like, up to 24. Remaining squares will be filled with general site-visit items.</p>
 
+  <div class="field" style="margin-bottom:8px;">
+    <label>Custom bingo items (optional, up to 24)</label>
   </div>
   <div class="items-grid" id="itemsGrid"></div>
   <button id="addItemBtn" type="button" style="background:#D0D0C3; color:#003057;">+ Add custom item</button>
+  <p class="items-note">Add as many as you like, up to 24. Any remaining squares are filled from the default R&amp;M site-visit items.</p>
 </div>
 
 <div id="cardsWrap"></div>
 
-</div>
 </div>
 
 <script>
@@ -246,8 +247,57 @@
     wrap.scrollIntoView({behavior:'smooth'});
   });
 
-  document.getElementById('printBtn').addEventListener('click', function() {
-    window.print();
-  });
+  const PRINT_CSS = `
+    body { font-family: Arial, Helvetica, sans-serif; color: #101820; margin: 0; }
+    .page { display: flex; flex-direction: column; gap: 0; page-break-after: always; }
+    .card { box-sizing: border-box; padding: 14px 16px 16px 16px; position: relative; height: 47%; overflow: hidden; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .card-header .titles h1 { font-size: 20px; margin: 0; color: #101820; letter-spacing: 0.5px; }
+    .card-header .titles p { font-size: 10px; margin: 2px 0 0 0; color: #6C6463; }
+    .card-header img { height: 22px; }
+    .accent { height: 3px; background: #E00700; margin-bottom: 10px; }
+    .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 4px; }
+    .cell { border: 1px solid #999; background: #fff; font-size: 9.2px; line-height: 1.15; text-align: center; display: flex; align-items: center; justify-content: center; padding: 4px; min-height: 62px; color: #101820; }
+    .cell.free { background: #fff; color: #E00700; font-weight: bold; font-size: 12px; border: 2px solid #E00700; }
+    .cutline { border-top: 1px dashed #999; text-align: center; font-size: 9px; color: #999; margin: 4px 0; position: relative; }
+    .cutline span { background: #fff; padding: 0 8px; position: relative; top: -7px; }
+    @page { size: letter portrait; margin: 0.3in; }
+    .page { height: 100%; justify-content: space-between; }
+  `;
+
+  function doPrint() {
+    const cardsHTML = document.getElementById('cardsWrap').innerHTML;
+    let printWin = null;
+    try {
+      printWin = window.open('', '_blank', 'width=850,height=1100');
+    } catch (e) {
+      printWin = null;
+    }
+
+    if (printWin) {
+      printWin.document.open();
+      printWin.document.write(
+        '<!DOCTYPE html><html><head><title>Site Visit Bingo Cards</title>' +
+        '<style>' + PRINT_CSS + '</style></head><body>' + cardsHTML + '</body></html>'
+      );
+      printWin.document.close();
+      const triggerPrint = function() {
+        try { printWin.focus(); printWin.print(); } catch (e) {}
+      };
+      printWin.onload = triggerPrint;
+      setTimeout(triggerPrint, 400);
+    } else {
+      // Popup blocked or unavailable (e.g. sandboxed iframe with no allow-popups) — fall back to in-place print
+      try {
+        window.print();
+      } catch (e) {
+        document.getElementById('status').textContent =
+          'Printing is blocked in this embedded view. Please open this tool in its own browser tab to print.';
+      }
+    }
+  }
+
+  document.getElementById('printBtn').addEventListener('click', doPrint);
 })();
 </script>
+
