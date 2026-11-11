@@ -66,7 +66,7 @@ const scoreElement = createElementStyle(
 const canvas = createElementStyle("canvas");
 const introductionElement = createElementStyle(
   "div",
-  `font-size:1.2em;position:absolute;text-align:center;transition:opacity 2s;width:250px`,
+  `font-size:1.2em;position:absolute;text-align:center;transition:opacity 2s;width:450px`,
   "Click and hold anywhere to stretch out a candy cane bridge to the next chimney. If it's too short, Santa will fall!"
 );
 const perfectElement = createElementStyle(
