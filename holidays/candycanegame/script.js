@@ -31,7 +31,7 @@ const colours = {
   darkHill: "#07133A",
   platform: "#9B4546",
   platformTop: "#620E0E",
-  em: "#CC231E",
+  em: "#e00700",
   skin: "#CF6D60"
 };
 
@@ -77,7 +77,7 @@ const perfectElement = createElementStyle(
 const restartButton = createElementStyle(
   "button",
   `width:120px;height:120px;position:absolute;border-radius:50%;color:white;background-color:${colours.em};border:none;font-weight:700;font-size:1.2em;display:none;cursor:pointer`,
-  "RESTART"
+  "Play Again"
 );
 
 // Adding snow
