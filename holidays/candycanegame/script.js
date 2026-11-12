@@ -66,7 +66,7 @@ const scoreElement = createElementStyle(
 const canvas = createElementStyle("canvas");
 const introductionElement = createElementStyle(
   "div",
-  `font-size:1.8em;position:absolute;text-align:center;transition:opacity 2s;width:650px;border-radius: 6px;padding: 10px;border: 3px dashed #e00700; background-color:rgba(255,255,255,.7);color:#e00700;top: 225px;`,
+  `font-size:1.8em;position:absolute;text-align:center;transition:opacity 2s;width:650px;border-radius: 6px;padding: 10px;border: 3px dashed #e00700; background-color:rgba(255,255,255,.7);color:#e00700;top: 275px;`,
   "Click and hold anywhere to build a candy cane bridge to the next chimney. If it’s too short, Santa will fall!"
 );
 const perfectElement = createElementStyle(
@@ -76,7 +76,7 @@ const perfectElement = createElementStyle(
 );
 const restartButton = createElementStyle(
   "button",
-  `top: 225px;width:120px;height:120px;position:absolute;border-radius:50%;color:white;background-color:${colours.em};border:none;font-weight:700;font-size:1.2em;display:none;cursor:pointer;border:2px solid #8a3524;font-family:"NB International Pro",sans-serif;`,
+  `top: 275px;width:120px;height:120px;position:absolute;border-radius:50%;color:white;background-color:${colours.em};border:none;font-weight:700;font-size:1.2em;display:none;cursor:pointer;border:2px solid #8a3524;font-family:"NB International Pro",sans-serif;`,
   "Play Again"
 );
 
