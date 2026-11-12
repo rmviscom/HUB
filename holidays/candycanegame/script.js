@@ -66,7 +66,7 @@ const scoreElement = createElementStyle(
 const canvas = createElementStyle("canvas");
 const introductionElement = createElementStyle(
   "div",
-  `font-size:1.8em;position:absolute;text-align:center;transition:opacity 2s;width:650px;border-radius: 6px;padding: 10px;border: 3px dashed #e00700;`,
+  `font-size:1.8em;position:absolute;text-align:center;transition:opacity 2s;width:650px;border-radius: 6px;padding: 10px;border: 3px dashed #e00700; background-color:rgba(255,255,255,.2);`,
   "Click and hold anywhere to stretch out a candy cane bridge to the next chimney. If it's too short, Santa will fall!"
 );
 const perfectElement = createElementStyle(
