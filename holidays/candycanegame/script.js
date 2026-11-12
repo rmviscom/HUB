@@ -71,8 +71,8 @@ const introductionElement = createElementStyle(
 );
 const perfectElement = createElementStyle(
   "div",
-  "position:absolute;opacity:0;transition:opacity 2s",
-  "Double Score"
+  "position:absolute;opacity:0;transition:opacity 2s; font-size:1.2em;",
+  "DOUBLE SCORE!"
 );
 const restartButton = createElementStyle(
   "button",
