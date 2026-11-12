@@ -76,7 +76,7 @@ const perfectElement = createElementStyle(
 );
 const restartButton = createElementStyle(
   "button",
-  `width:120px;height:120px;position:absolute;border-radius:50%;color:white;background-color:${colours.em};border:none;font-weight:700;font-size:1.2em;display:none;cursor:pointer`,
+  `width:120px;height:120px;position:absolute;border-radius:50%;color:white;background-color:${colours.em};border:none;font-weight:700;font-size:1.2em;display:none;cursor:pointer;border:2px solid #8a3524;font-family:"NB International Pro",sans-serif;`,
   "Play Again"
 );
 
